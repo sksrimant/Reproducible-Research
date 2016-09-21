@@ -1,0 +1,173 @@
+==================================================================================================
+  
+Reproducible Research  Week2 Assignment
+  
+==================================================================================================
+  
+Section 1: Loading and preprocessing the data
+  
+```{r}
+#Reading the CSV file.
+MyData <- read.csv(file="activity.csv", header=TRUE, sep=",")
+
+# String to date conversion
+MyData$date <- as.Date(MyData[,2],'%m/%d/%Y')
+
+```
+
+What is mean total number of steps taken per day?
+```{r}
+# Reading the CSV file.
+MyData <- read.csv(file="activity.csv", header=TRUE, sep=",")
+
+# String to date conversion
+MyData$date <- as.Date(MyData[,2],'%m/%d/%Y')
+
+# Aggregating the data to find the total steps per day.
+MyData_agg <- aggregate(MyData$steps, by=list(MyData$date), FUN= sum)
+
+# Converting date format to "date,Month"
+MyData_agg$date <- format(MyData_agg$Group.1, "%d%b")
+
+# Plotting the graph
+barplot(MyData_agg[,2],width = ,space= .5,
+	 names.arg = MyData_agg$date,
+	 main = "Steps Date Analysis",
+	 xlab = "Year", ylab = "Total Number of Steps")
+
+## Mean and median number of steps taken each day
+
+library(doBy)
+
+# Aggregating the data.
+summaryBy(MyData$steps ~ MyData$date, data = MyData,FUN = list(mean, max, min, median, sd))
+```
+
+
+ 
+ What is the average daily activity pattern?
+```{r}
+#Time series plot of the mean of steps taken per day
+
+# Reading the CSV file.
+MyData <- read.csv(file="activity.csv", header=TRUE, sep=",")
+
+# String to date conversion
+MyData$date <- as.Date(MyData[,2],'%m/%d/%Y')
+
+#Aggregating to find mean.
+MyData_avg <- aggregate(steps ~ interval,MyData, mean)
+
+# Plotting the line graph.
+plot(MyData_avg$interval,MyData_avg$steps,type = "o",col="blue",
+                 #names.arg = MyData_avg$interval,
+                 xlab = "Interval", ylab = "Steps",
+                 main = "Mean No of Steps per interval") 
+
+# Aggregating the data to find the max steps
+MyData_max <- aggregate(steps ~ date, MyData, max)
+
+# Merging to get the interval
+Max_Steps_int <- merge(MyData_max, MyData)
+
+Max_Steps_int
+
+
+
+```
+
+Imputing missing values
+```{r}
+# Reading the data from the CSV file.
+MyData <- read.csv(file="activity.csv", header=TRUE, sep=",")
+
+#Count rows with NA values
+sum(is.na(MyData$steps))
+
+
+# Imputing the missing data with the mean value.
+MyData$steps[which(is.na(MyData$steps))] <- tapply(MyData$steps, MyData$interval, mean,na.rm=TRUE, simplify=TRUE)
+
+
+# String to date conversion
+MyData$date <- as.Date(MyData[,2],'%m/%d/%Y')
+
+# Aggregating the data to find the total steps per day.
+MyData_agg <- aggregate(MyData$steps, by=list(MyData$date), FUN= sum)
+
+# Converting date format to "date,Month"
+MyData_agg$date <- format(MyData_agg$Group.1, "%d%b")
+
+
+# Plotting the graph
+barplot(MyData_agg[,2],width = ,space= .5,
+	 names.arg = MyData_agg$date,
+	 main = "Steps Date Analysis",
+	 xlab = "Year", ylab = "Total Number of Steps")
+
+```
+
+Are there differences in activity patterns between weekdays and weekends?
+
+```{r}
+# Reading the CSV file.
+MyData <- read.csv(file="activity.csv", header=TRUE, sep=",")
+
+# Imputing the missing data with the 0 value.
+#MyData$steps[which(is.na(MyData$steps))] <- 0
+
+
+# String to date conversion
+MyData$date <- as.Date(MyData[,2],'%m/%d/%Y')
+
+# Adding a Day column to distinguish between Weekdays and Weekends
+MyData$day <- weekdays(MyData$date)
+
+
+# Data Frames having only the weekend data
+MyData_weekend  <- subset(MyData,MyData$day == 'Sunday'|MyData$day == 'Saturday')
+MyData_weekend  <- MyData_weekend[,c("steps","interval")]
+
+
+# Mean value of steps with each intervals during weekends
+MyData_weekend_mean <- aggregate(steps ~ interval, MyData_weekend, mean)
+
+
+
+# Data Frames having only the weekdays data
+MyData_weekdays  <- subset(MyData,MyData$day != 'Sunday'& MyData$day != 'Saturday')
+MyData_weekdays  <- MyData_weekdays[,c("steps","interval")]
+
+
+# Mean value of steps with each intervals during weekdays
+MyData_weekdays_mean <- aggregate(steps ~ interval, MyData_weekdays, mean)
+
+
+
+par(mfrow=c(2,1))
+
+# Plotting the graph
+barplot(MyData_weekend_mean$steps,width = ,space= .5,
+	 names.arg = MyData_weekend_mean$interval,
+	 main = "Steps Interval Analysis in Weekends",
+	 xlab = "Interval", ylab = "Total Number of Steps")
+	 #axis(1, at = seq(0, 2400,by = 200), las=2)
+
+
+
+barplot(MyData_weekdays_mean$steps,width = ,space= .5,
+	 names.arg = MyData_weekdays_mean$interval,
+	 main = "Steps Interval Analysis in Weekdays",
+	 xlab = "Interval", ylab = "Total Number of Steps")
+
+```
+
+
+
+
+
+
+
+ 
+
+  
