@@ -14,9 +14,7 @@ What is the average daily activity pattern?
 
 Aggregating the data to find the max steps 
 
-Imputing missing values
-
-Imputing the missing data with the mean value.
+Imputing the missing data with the mean value of the same interval
 
 
 
